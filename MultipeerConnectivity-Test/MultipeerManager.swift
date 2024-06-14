@@ -1,7 +1,7 @@
 import Foundation
 import MultipeerConnectivity
 
-class MultipeerManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {
+class MultipeerManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate, StreamDelegate {
     static let shared = MultipeerManager()
     @Published var connected = false
     @Published var connectedWith: MCPeerID?
@@ -11,6 +11,8 @@ class MultipeerManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDel
     var mcSession: MCSession?
     var mcAdvertiser: MCNearbyServiceAdvertiser?
     var mcBrowser: MCNearbyServiceBrowser?
+    var outputStream: OutputStream?
+    var inputStream: InputStream?
 
     override init() {
         super.init()
@@ -80,7 +82,6 @@ class MultipeerManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDel
     }
 
     // Session
-
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         print("DID CHANGE FOR: \(peerID.displayName)")
         if state == .connected {
@@ -88,6 +89,7 @@ class MultipeerManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDel
             DispatchQueue.main.async { [weak self] in
                 self?.connected = true
                 self?.connectedWith = self?.foundPeerId
+                self?.startStream(toPeer: peerID)
             }
         } else if state == .notConnected {
             print("DID CHANGE: NOT CONNECTED")
@@ -110,6 +112,12 @@ class MultipeerManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDel
 
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
         print("DID RECEIVE STREAM")
+        if streamName == "mouseStream" {
+            self.inputStream = stream
+            self.inputStream?.delegate = self
+            self.inputStream?.schedule(in: .current, forMode: .default)
+            self.inputStream?.open()
+        }
     }
 
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
@@ -118,5 +126,74 @@ class MultipeerManager: NSObject, ObservableObject, MCNearbyServiceAdvertiserDel
 
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
         print("DID FINISH RECEIVING")
+    }
+
+    // Stream
+    func startStream(toPeer peer: MCPeerID) {
+        do {
+            outputStream = try mcSession?.startStream(withName: "mouseStream", toPeer: peer)
+            outputStream?.delegate = self
+            outputStream?.schedule(in: .current, forMode: .default)
+            outputStream?.open()
+        } catch {
+            print("Error starting stream: \(error.localizedDescription)")
+        }
+    }
+
+    func sendEvent(event: NSEvent) {
+        guard let outputStream = outputStream else { return }
+
+        // Serialize the mouse event
+        let mouseData = encodeMouseEvent(event)
+        _ = mouseData.withUnsafeBytes { outputStream.write($0, maxLength: mouseData.count) }
+    }
+
+    func encodeMouseEvent(_ event: NSEvent) -> Data {
+        var point = CGPoint(x: event.locationInWindow.x, y: event.locationInWindow.y)
+        return Data(bytes: &point, count: MemoryLayout<CGPoint>.size)
+    }
+
+    func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+        switch eventCode {
+        case .hasBytesAvailable:
+            if aStream == inputStream {
+                readIncomingStream(aStream as! InputStream)
+            }
+        case .endEncountered:
+            aStream.close()
+            aStream.remove(from: .current, forMode: .default)
+            inputStream = nil
+        default:
+            break
+        }
+    }
+
+    func readIncomingStream(_ stream: InputStream) {
+        let bufferSize = MemoryLayout<CGPoint>.size
+        var buffer = [UInt8](repeating: 0, count: bufferSize)
+
+        while stream.hasBytesAvailable {
+            let bytesRead = stream.read(&buffer, maxLength: bufferSize)
+            if bytesRead > 0 {
+                let data = Data(buffer)
+                handleMouseData(data)
+            }
+        }
+    }
+
+    func handleMouseData(_ data: Data) {
+        var point = CGPoint.zero
+        data.withUnsafeBytes {
+            point = $0.load(as: CGPoint.self)
+        }
+        // Move mouse cursor
+        CGWarpMouseCursorPosition(point)
+    }
+
+    // Helper function to get the hostname
+    func getHostName() -> String {
+        var name = [CChar](repeating: 0, count: Int(MAXHOSTNAMELEN))
+        gethostname(&name, name.count)
+        return String(cString: name)
     }
 }

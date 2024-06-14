@@ -42,10 +42,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 @main
 struct MultipeerConnectivity_TestApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var multipeerManager = MultipeerManager.shared
     
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(multipeerManager)
+                .onAppear {
+                    multipeerManager.initBrowser()  // Start browsing for peers
+                }
         }
     }
 }
