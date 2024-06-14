@@ -11,6 +11,8 @@
 		219D0B072C1C658F00AF1BD0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219D0B062C1C658F00AF1BD0 /* ContentView.swift */; };
 		219D0B092C1C659100AF1BD0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 219D0B082C1C659100AF1BD0 /* Assets.xcassets */; };
 		219D0B0C2C1C659100AF1BD0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 219D0B0B2C1C659100AF1BD0 /* Preview Assets.xcassets */; };
+		219D0B142C1C6D3100AF1BD0 /* MultipeerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219D0B132C1C6D3100AF1BD0 /* MultipeerManager.swift */; };
+		219D0B172C1C6D8800AF1BD0 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219D0B162C1C6D8800AF1BD0 /* Utils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +22,8 @@
 		219D0B082C1C659100AF1BD0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		219D0B0B2C1C659100AF1BD0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		219D0B0D2C1C659100AF1BD0 /* MultipeerConnectivity_Test.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MultipeerConnectivity_Test.entitlements; sourceTree = "<group>"; };
+		219D0B132C1C6D3100AF1BD0 /* MultipeerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerManager.swift; sourceTree = "<group>"; };
+		219D0B162C1C6D8800AF1BD0 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,7 +57,9 @@
 			isa = PBXGroup;
 			children = (
 				219D0B042C1C658F00AF1BD0 /* MultipeerConnectivity_TestApp.swift */,
+				219D0B132C1C6D3100AF1BD0 /* MultipeerManager.swift */,
 				219D0B062C1C658F00AF1BD0 /* ContentView.swift */,
+				219D0B162C1C6D8800AF1BD0 /* Utils.swift */,
 				219D0B082C1C659100AF1BD0 /* Assets.xcassets */,
 				219D0B0D2C1C659100AF1BD0 /* MultipeerConnectivity_Test.entitlements */,
 				219D0B0A2C1C659100AF1BD0 /* Preview Content */,
@@ -140,7 +146,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				219D0B072C1C658F00AF1BD0 /* ContentView.swift in Sources */,
+				219D0B142C1C6D3100AF1BD0 /* MultipeerManager.swift in Sources */,
 				219D0B052C1C658F00AF1BD0 /* MultipeerConnectivity_TestApp.swift in Sources */,
+				219D0B172C1C6D8800AF1BD0 /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
